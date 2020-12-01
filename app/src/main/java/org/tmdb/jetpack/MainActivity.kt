@@ -7,10 +7,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import dagger.hilt.android.AndroidEntryPoint
 import org.tmdb.jetpack.base.core.extensions.setupWithNavController
 import org.tmdb.jetpack.base.ui.viewmodel.AppbarViewModel
 import org.tmdb.jetpack.databinding.ActivityMainBinding
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val appbarViewModel by viewModels<AppbarViewModel>()

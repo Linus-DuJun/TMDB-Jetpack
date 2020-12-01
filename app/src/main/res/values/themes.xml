@@ -13,4 +13,16 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="actionMenuTextColor">@drawable/default_menu_item_selector</item>
+        <item name="colorControlNormal">@color/black</item>
+    </style>
+
+    <style name="ToolbarTextAppearance">
+        <item name="android:textSize">@dimen/toolbar_title_text_size</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 </resources>
