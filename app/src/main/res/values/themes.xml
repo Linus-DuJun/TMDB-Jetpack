@@ -25,4 +25,8 @@
         <item name="android:textColor">@color/black</item>
     </style>
 
+    <style name="LaunchScreenTheme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:background">@drawable/bg_launch_screen</item>
+    </style>
+
 </resources>
