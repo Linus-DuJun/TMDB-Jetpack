@@ -18,10 +18,11 @@ class MovieRepositoryImpl @Inject constructor(
     private val movieService: MovieService,
     private val db: MyDatabase
 ) : MovieRepository {
-    override fun getTopRatedMovies(): Flow<PagingData<Movie>> {
+
+    override fun getTopRatedMovies(pageSize: Int): Flow<PagingData<Movie>> {
         val movieDao = db.moviesDao()
         return Pager(
-            config = PagingConfig(pageSize = 1, prefetchDistance = 1, enablePlaceholders = false),
+            config = PagingConfig(pageSize = pageSize, prefetchDistance = pageSize * 2),
             remoteMediator = MovieRemoteMediator(db = db, movieService),
             pagingSourceFactory = { movieDao.query() }
         ).flow.map {

@@ -8,7 +8,7 @@ object MovieComparator : DiffUtil.ItemCallback<MovieAdapterItem>() {
     }
 
     override fun areContentsTheSame(oldItem: MovieAdapterItem, newItem: MovieAdapterItem): Boolean {
-        return oldItem.title == newItem.title
+        return oldItem == newItem
     }
 
 }

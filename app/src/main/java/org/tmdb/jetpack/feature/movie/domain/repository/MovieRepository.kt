@@ -6,6 +6,6 @@ import org.tmdb.jetpack.feature.movie.domain.model.Movie
 
 interface MovieRepository {
 
-    fun getTopRatedMovies(): Flow<PagingData<Movie>>
+    fun getTopRatedMovies(pageSize: Int): Flow<PagingData<Movie>>
 
 }

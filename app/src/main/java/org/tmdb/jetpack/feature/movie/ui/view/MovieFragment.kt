@@ -2,17 +2,18 @@ package org.tmdb.jetpack.feature.movie.ui.view
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_movie.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 import org.tmdb.jetpack.R
 import org.tmdb.jetpack.base.ui.adapter.UniversalPagingAdapter
 import org.tmdb.jetpack.base.ui.view.BaseFragment
@@ -31,7 +32,6 @@ class MovieFragment: BaseFragment<FragmentMovieBinding>() {
 
     private lateinit var viewModel: MovieViewModel
     private lateinit var adapter: UniversalPagingAdapter<MovieAdapterItem>
-    private lateinit var adapterObserver: RecyclerView.AdapterDataObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,30 +59,35 @@ class MovieFragment: BaseFragment<FragmentMovieBinding>() {
     private fun initToolbar() {
         val toolbar = requireView().findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.title_movie)
-        val appBarConfiguration = AppBarConfiguration(navController.graph)
-        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration)
-        (requireActivity() as AppCompatActivity).setSupportActionBar(toolbar)
+//        val appBarConfiguration = AppBarConfiguration(navController.graph)
+//        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration)
+//        (requireActivity() as AppCompatActivity).setSupportActionBar(toolbar)
     }
 
     private fun initAdapter() {
         val recycler = requireView().findViewById<RecyclerView>(R.id.recycler)
-        adapter = UniversalPagingAdapter(MovieComparator).apply {
-            adapterObserver = object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    recycler.scrollToPosition(positionStart)
-                }
-            }
-            registerAdapterDataObserver(adapterObserver)
-        }
+        adapter = UniversalPagingAdapter(MovieComparator)
         recycler.adapter = adapter
+        lifecycleScope.launchWhenCreated {
+            @OptIn(ExperimentalCoroutinesApi::class)
+            adapter.loadStateFlow.collectLatest {
+                swipe_refresh?.isRefreshing = it.refresh == LoadState.Loading
+            }
+        }
         lifecycleScope.launchWhenCreated {
             @OptIn(ExperimentalCoroutinesApi::class)
             viewModel.movieItems.collectLatest { adapter.submitData(it) }
         }
+        lifecycleScope.launchWhenCreated {
+            @OptIn(FlowPreview::class)
+            adapter.loadStateFlow
+                .distinctUntilChangedBy { it.refresh } // Only emit when REFRESH LoadState for RemoteMediator changes
+                .filter { it.refresh is LoadState.NotLoading } // Only react to cases where Remote REFRESH completes. i.e NotLoading
+                .collectLatest { recycler.scrollToPosition(0) }
+        }
     }
 
     private fun initSwipeRefresh() {
-        val refresher = requireView().findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
-        refresher.setOnRefreshListener { adapter.refresh() }
+        swipe_refresh.setOnRefreshListener { adapter.refresh() }
     }
 }

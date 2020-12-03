@@ -13,8 +13,12 @@ class MovieViewModel @ViewModelInject constructor(
     private val movieRepository: MovieRepository
 ) : ViewModel() {
 
+    companion object {
+        const val MOVIE_PAGE_SIZE = 20
+    }
+
     val movieItems = movieRepository
-        .getTopRatedMovies()
+        .getTopRatedMovies(MOVIE_PAGE_SIZE)
         .map {
             it.map {
                 it.toMovieAdapterItem(onMovieClickEvent)
